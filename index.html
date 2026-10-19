@@ -35,6 +35,7 @@
 <body>
 <canvas id="game" width="640" height="360" aria-label="IP, PLEASE 游戏画面"></canvas>
 <div class="ui">
+  <button id="lang" type="button">旅客原话</button>
   <button id="mute" type="button">声音：开</button>
   <button id="full" type="button">全屏</button>
 </div>
@@ -54,6 +55,8 @@
 <script src="screens.js"></script>
 <script src="main.js"></script>
 <script>
+  document.getElementById('lang').addEventListener('click', () => toggleUiLang());
+  syncLangButton();
   document.getElementById('mute').addEventListener('click', () => toggleMute());
   const fullBtn = document.getElementById('full');
   const root = document.documentElement;

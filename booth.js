@@ -20,6 +20,18 @@ const BANNER1_X = 70;
 
 // —— 全局状态（各脚本共用） ——
 let canvasEl, F, now = 0;    // F：离屏画布（整帧先画在这里，再合成到屏幕）
+let uiLang = 'orig';
+try { if (localStorage.getItem('ip-please-ui-lang') === 'zh') uiLang = 'zh'; } catch (e) { /* 隐私模式：不记语言 */ }
+function syncLangButton() {
+  const b = document.getElementById('lang');
+  if (b) b.textContent = uiLang === 'zh' ? '旅客译文' : '旅客原话';
+}
+function toggleUiLang() {
+  uiLang = uiLang === 'zh' ? 'orig' : 'zh';
+  try { localStorage.setItem('ip-please-ui-lang', uiLang); } catch (e) { /* 同上 */ }
+  syncLangButton();
+}
+function shown(ln) { return ln && !ln.raw && uiLang === 'zh' && ln.zh ? ln.zh : ln.text; }
 const S = {};                // 跨天的存档
 let B = null;                // 当天检查亭的状态
 const ptr = { x: 320, y: 180, mouse: false, down: false };
@@ -50,9 +62,13 @@ function runTimers() {
   due.sort((a, b) => a.t - b.t).forEach((x) => x.fn());
 }
 
-function say(who, text) {
+function say(who, text, opt) {
   const e = B.ent;
-  B.lines.push({ t: now, who, text, ent: e });
+  opt = opt || {};
+  if (who === 'E' && e && e.spec && e.spec.tongue && e.spec.tongue !== 'zh' && hasHan(text)) text = papersLeft(e.spec.tongue);
+  const raw = !!opt.raw || !!(who === 'E' && e && e.spec && e.spec.rawSpeech);
+  const zh = raw ? text : glossLine(text);
+  B.lines.push({ t: now, who, text, zh, raw, ent: e });
   const pitch = who === 'C' ? 176 : who === 'Q' ? 160 : (e ? e.spec.voice : 125);
   SFX.mumble(text, pitch, B.lines.length * 7 + S.day);
   if (who === 'E' && e) e.talkUntil = now + Math.min(1.3, 0.25 + 0.065 * [...text].length);
@@ -137,7 +153,7 @@ function checkLeave() {
   const prim = primaryOf(e);
   if (!prim || !prim.returned) return;
   if (B.docs.some((d) => d.owner === 'ent' && d.big && !d.loose)) {
-    if (!e.complained) { e.complained = true; say('E', '我的证件还在你那儿。'); }
+    if (!e.complained) { e.complained = true; say('E', papersLeft(e.spec.tongue || 'zh')); }
     return;
   }
   const dec = decisionOf(prim);
@@ -234,8 +250,8 @@ function flash(text) { B.flash = { text, t: now }; }
 
 // ———————————————————— 证件机关 ————————————————————
 
-const NEST = [[124, 84, [24, 86, 96], 'CAYMAN ISLANDS'], [98, 66, [40, 96, 70], 'BRITISH VIRGIN IS.'],
-  [74, 50, [110, 40, 52], 'HONG KONG'], [40, 28, [150, 30, 30], '中国']];
+const NEST = [[124, 84, [24, 86, 96], '开曼'], [98, 66, [40, 96, 70], '维尔京'],
+  [74, 50, [110, 40, 52], '香港'], [40, 28, [150, 30, 30], '中国']];
 
 function onFirstPlace(d) {
   const e = B.ent;
@@ -393,9 +409,10 @@ function docBox(d) { return [d.x, d.y, d.x + d.doc.w - 1, d.y + d.doc.h - 1]; }
 // 对话框（左下角最近三句）的位置，绘制和检查模式共用
 function lineBoxes() {
   return B.lines.slice(-3).map((ln, i) => {
-    const size = tw(ln.text, 12) > 176 ? 10 : 12;
+    const s = shown(ln);
+    const size = tw(s, 12) > 176 ? 10 : 12;
     const y = 288 + i * 17;
-    return { ln, size, box: [30, y, 30 + tw(ln.text, size) + 8, y + 15] };
+    return { ln, size, box: [30, y, 30 + tw(s, size) + 8, y + 15] };
   });
 }
 
@@ -576,7 +593,7 @@ function drawXray(e, ex) {
   }
   const scan = Math.round(seg(now, B.xray.t, B.xray.t + 0.6) * WIN_H);
   if (scan < WIN_H) { rect(0, scan, WIN_W - 1, WIN_H - 1, K.XRAY_BG); rect(0, scan, WIN_W - 1, scan + 1, K.XRAY_L); }
-  txt(4, 3, 'X-RAY · 后台进程扫描', 8, K.XRAY_L);
+  txt(4, 3, 'X光 · 后台进程扫描', 8, K.XRAY_L);
 }
 
 function drawWindow() {
@@ -683,12 +700,13 @@ function drawBoothLower() {
   outline(x0, y0, x0 + 18, y0 + 16, K.METAL_L);
   for (let yy = y0 + 3; yy < y0 + 15; yy += 3) rect(x0 + 3, yy, x0 + 15, yy, K.INK);
   for (const { ln, size, box } of lineBoxes()) {
+    const s = shown(ln);
     const n = Math.max(1, Math.floor((now - ln.t) * 26));
     const [x0, y] = box;
     rect(...box, 'rgb(30,28,26)');
     outline(...box, 'rgb(76,70,64)');
     if (ln.who === 'C') rect(x0, y, x0 + 1, y + 15, K.CLAUDE);
-    txt(35, y + (size === 12 ? 2 : 3), ln.text, size, ln.who === 'C' ? K.CLAUDE_L : K.WHITE, 'la', n);
+    txt(35, y + (size === 12 ? 2 : 3), s, size, ln.who === 'C' ? K.CLAUDE_L : K.WHITE, 'la', n);
   }
   txt(8, 347, `${DATES[S.day]}  ${WEEKDAYS[S.day]}`, 10, K.GREY);
   const m = 6 * 60 + Math.floor((now - B.clock0) / 1.1);

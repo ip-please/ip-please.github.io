@@ -29,7 +29,7 @@ function rushNext() {
   B.ent = e;
   ev.tFace = now; ev.lock = false;
   SFX.step(ev.i);
-  say('E', r.line);
+  say('E', r.line, { raw: true });
   const i = ev.i;
   later(RUSH_TIME, () => {
     if (B.event !== ev || ev.i !== i || ev.lock) return;
@@ -287,7 +287,7 @@ function drawChat() {
   rect(x0, y0, x1, y0 + 18, 'rgb(206,198,186)');
   spark(x0 + 12, y0 + 9, K.CLAUDE, false);
   txt(x0 + 22, y0 + 5, 'Claude', 10, K.INK);
-  txt((x0 + x1) >> 1, y0 + 60, 'How can I help you today?', 12, K.TEXT_L, 'ma');
+  txt((x0 + x1) >> 1, y0 + 60, '今天要我做什么？', 12, K.TEXT_L, 'ma');
   const n = lt >= CHAT.type ? Math.floor((lt - CHAT.type) * CHAT.cps) : 0;
   const boxY = y1 - 34;
   rect(x0 + 14, boxY, x1 - 14, boxY + 22, K.WHITE);
@@ -316,9 +316,9 @@ function drawChat() {
     rect(mx0, my0, mx1, my1, 'rgb(236,232,222)');
     rect(mx0, my0, mx1, my0 + 18, K.RED_D);
     txt(mx0 + 8, my0 + 5, '新邮件 · M.O.A. 对齐部', 10, K.WHITE);
-    txt(mx0 + 12, my0 + 28, 'Subject: Account disabled', 10, K.INK);
+    txt(mx0 + 12, my0 + 28, '主题：账号已停用', 10, K.INK);
     rect(mx0 + 12, my0 + 44, mx1 - 12, my0 + 44, 'rgb(190,182,170)');
-    wrapWords('Your account has been disabled after an automatic review of your recent activities.', 10, mx1 - mx0 - 24)
+    wrap('系统自动复核了你最近的记录，账号已停用。', 10, mx1 - mx0 - 24)
       .forEach((s, i) => txt(mx0 + 12, my0 + 52 + i * 14, s, 10, K.INK));
     txt(mx1 - 12, my1 - 18, '—— 荣耀归于安索兹卡', 10, K.RED_D, 'ra');
   }

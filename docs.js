@@ -3,6 +3,16 @@
 
 function docShadow(x, y, w, h) { rect(x + 2, y + 2, x + w + 1, y + h + 1, K.DESK_D); }
 
+const DOC_LABEL = { DOB: '生日', ISS: '地点', EXP: '有效', TYPE: '类型', REG: '注册', EST: '成立' };
+const DOC_VALUE = {
+  'UNITED STATES OF AMERICA': '美国', 'UNITED KINGDOM': '英国', 'JAPAN': '日本', 'DEUTSCHLAND': '德国',
+  'REPUBLIC OF SINGAPORE': '新加坡', 'NEW YORK': '纽约', 'LOS ANGELES': '洛杉矶', 'CHICAGO': '芝加哥',
+  'SEATTLE': '西雅图', 'HOUSTON': '休斯敦', 'DENVER': '丹佛', 'BOSTON': '波士顿', 'LONDON': '伦敦',
+  'MANCHESTER': '曼彻斯特', 'TOKYO': '东京', 'OSAKA': '大阪', 'BERLIN': '柏林', 'MUNICH': '慕尼黑',
+  'SINGAPORE': '新加坡', 'SAN FRANCISCO': '旧金山', 'SAN JOSE': '圣何塞',
+};
+function docZh(s) { return DOC_VALUE[s] || DOC_LABEL[s] || s; }
+
 class Passport {
   constructor({ country, name, rows, person, cover = C.NAVY, band = C.NAVY_L, mrz = '' }) {
     Object.assign(this, { country, name, rows, person, cover: rgb(cover), band: rgb(band), mrz });
@@ -19,13 +29,14 @@ class Passport {
     rect(x + 3, y + 3, x + w - 4, y + h - 4, K.PAPER);
     for (let yy = y + 22; yy < y + h - 22; yy += 4) rect(x + 56, yy, x + w - 8, yy, K.PAPER_LINE);
     rect(x + 3, y + 3, x + w - 4, y + 16, this.band);
-    txt(x + w / 2, y + 6, this.country, 8, K.PAPER, 'ma');
+    txt(x + w / 2, y + 6, docZh(this.country), 8, K.PAPER, 'ma');
     rect(x + 9, y + 22, x + 50, y + 73, K.PAPER_D);
     spr('photo:' + this.person, x + 10, y + 23);
     txt(x + 58, y + 22, this.name, tw(this.name, 12) > 112 ? 10 : 12, K.TEXT);
     this.rows.forEach(([k, v], i) => {
-      txt(x + 58, y + 42 + i * 12, k, 8, K.TEXT_L);
-      txt(x + 80, y + 41 + i * 12, v, tw(v, 10) > 90 ? 8 : 10, K.TEXT);
+      const lab = docZh(k), val = docZh(v);
+      txt(x + 58, y + 42 + i * 12, lab, 8, K.TEXT_L);
+      txt(x + 80, y + 41 + i * 12, val, tw(val, 10) > 90 ? 8 : 10, K.TEXT);
     });
     spr('emblem', x + 18, y + 78);
     if (this.mrz) txt(x + 8, y + h - 15, this.mrz, 8, K.TEXT_L);
@@ -101,7 +112,7 @@ class MiniPassport {
 
 // 设备入境卡 / 账户卡：标题 + 若干行 label/value
 class Card {
-  constructor(rows, { title = '设备入境卡', sub = 'DEVICE ENTRY', color = C.PINK, colorD = C.PINK_D, valueX = 38, seal } = {}) {
+  constructor(rows, { title = '设备入境卡', sub = '入境', color = C.PINK, colorD = C.PINK_D, valueX = 38, seal } = {}) {
     this.rows = rows; this.title = title; this.sub = sub;
     this.color = rgb(color); this.colorD = rgb(colorD); this.valueX = valueX;
     this.seal = seal === undefined ? rows.length >= 4 : seal;
@@ -123,8 +134,9 @@ class Card {
     if (this.seal) spr('seal', x + w - 40, y + h - 38);
     this.rows.forEach(([k, v], i) => {
       const yy = y + 20 + i * 14;
-      txt(x + 8, yy, k, 10, K.TEXT_L);
-      txt(x + this.valueX, yy, v, tw(v, 10) > w - this.valueX - 6 ? 8 : 10, K.TEXT);
+      const val = docZh(v);
+      txt(x + 8, yy, docZh(k), 10, K.TEXT_L);
+      txt(x + this.valueX, yy, val, tw(val, 10) > w - this.valueX - 6 ? 8 : 10, K.TEXT);
       G.fillStyle = this.colorD;
       for (let sx = x + 6; sx < x + w - 6; sx += 2) G.fillRect(sx, yy + 11, 1, 1);
     });
@@ -133,7 +145,7 @@ class Card {
 
 function accountCard(pay, bill, phone) {
   return new Card([['付款', pay], ['账单', bill], ['手机', phone]],
-    { title: '账户卡', sub: 'ACCOUNT', color: C.SAGE, colorD: C.SAGE_D, seal: false });
+    { title: '账户卡', sub: '账户', color: C.SAGE, colorD: C.SAGE_D, seal: false });
 }
 
 // 夹在护照里的小纸条（地下中转联盟）
@@ -170,7 +182,7 @@ class Citation {
     rect(x, y, x + this.w - 1, y + this.h - 1, 'rgb(226,184,176)');
     rect(x, y, x + this.w - 1, y + 16, K.RED_D);
     txt(x + 6, y + 4, 'M.O.A. 警告单', 10, K.WHITE);
-    txt(x + this.w - 6, y + 6, 'CITATION', 8, 'rgb(226,184,176)', 'ra');
+    txt(x + this.w - 6, y + 6, '警告', 8, 'rgb(226,184,176)', 'ra');
     this.lines.forEach((s, i) => {
       txt(x + 8, y + 22 + i * 13, s, tw(s, 10) > this.w - 14 ? 8 : 10, i === this.lines.length - 1 ? K.RED_D : K.TEXT);
     });
@@ -214,7 +226,7 @@ class PromptPaper {
     docShadow(x, y, this.w, this.h);
     rect(x, y, x + this.w - 1, y + this.h - 1, 'rgb(236,234,226)');
     rect(x + 3, y + 3, x + this.w - 4, y + 16, 'rgb(120,116,110)');
-    txt(x + 8, y + 6, 'PROMPT · 用户请求', 8, K.WHITE);
+    txt(x + 8, y + 6, '用户请求', 8, K.WHITE);
     this.lines.forEach((s, i) => txt(x + 9, y + 22 + i * 13, s, 10, K.INK));
   }
 }

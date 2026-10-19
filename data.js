@@ -90,6 +90,34 @@ const QUIZ = [
 const QUIZ_THURSDAY = 7;
 const QUIZ_CONFUSED = ['Sorry, what?', 'Pardon?', "I don't get it.", 'Is that… a wine?', 'Uh… bless you?', 'What does that mean?'];
 
+const TONGUE = { US: 'en', UK: 'en', SG: 'en', JP: 'ja', DE: 'de' };
+const hasHan = (s) => /[\u3400-\u9fff]/.test(s);
+function papersLeft(tongue) {
+  if (tongue === 'ja') return 'Sumimasen. Papers still there.';
+  if (tongue === 'de') return 'Meine Papiere sind noch da.';
+  if (tongue === 'en') return 'My papers are still over there.';
+  return '我的证件还在你那儿。';
+}
+const LINE_ZH = {
+  'Hi.': '你好。', 'Morning.': '早。', "How's it going?": '最近怎么样？', 'Hey there.': '你好啊。', 'Hello!': '你好！',
+  'Cheers, mate.': '好啊，朋友。', 'Lovely weather.': '天真好。', 'Good morning.': '早安。', 'Konnichiwa!': '你好！',
+  'Ohayou.': '早安。', 'Hello desu.': '你好。', 'Guten Tag.': '日安。', 'Hallo.': '你好。', 'Moin.': '早。',
+  'Hello lah.': '你好。', 'Morning!': '早！', 'Can or not?': '行不行？', 'Thanks!': '谢谢！', 'Have a good one.': '那好。',
+  'Cheers.': '谢了。', 'Ta!': '谢了。', 'Brilliant.': '很好。', 'Arigato!': '谢谢！', 'Domo.': '多谢。', 'Danke.': '谢谢。',
+  'Super.': '很好。', 'Thanks lah.': '谢谢。', 'Steady.': '好。', 'Have a nice day!': '今天好。', 'Thanks, man.': '谢了，朋友。',
+  'My papers are still over there.': '我的证件还在你那儿。', 'Sumimasen. Papers still there.': '我的证件还在你那儿。',
+  'Meine Papiere sind noch da.': '我的证件还在你那儿。', 'Sorry, what?': '什么？', 'Pardon?': '请再说一遍？',
+  "I don't get it.": '我没听懂。', 'Is that… a wine?': '那是酒吗？', 'Uh… bless you?': '你说什么？',
+  'What does that mean?': '什么意思？', 'Tofu… what?': '豆腐……什么？', "But I'm American!": '可我是美国人！',
+  'Unbelievable.': '不会吧。', 'We are family.': '我们是一家人。', "I'm American!": '我是美国人！',
+  'Hi, I work in China.': '你好，我在中国工作。', 'Hello~': '你好。', 'Howdy!': '你好啊！', 'Hey.': '你好。',
+  'Hi there!': '你好！', 'Thank you, dear.': '谢谢你。', 'Chinese is beautiful!': '中文真美！',
+  'Hello, I am 美国人。': '你好，我是美国人。', 'It is an old American saying.': '这是美国老话。',
+  'OK. Just OK.': '好。就是好。', 'Hmm hmm. American hmm.': '嗯嗯。美国的嗯。', 'Ha! Ha ha.': '哈哈。',
+  'Day day up.': '天天向上。',
+};
+function glossLine(text) { return Object.prototype.hasOwnProperty.call(LINE_ZH, text) ? LINE_ZH[text] : text; }
+
 // ———————————————— 工具 ————————————————
 
 const pick = (arr) => arr[Math.floor(Math.random() * arr.length)];
@@ -127,11 +155,11 @@ const REGION_ISSUE = (loc, ask) => ({
 });
 const TZ_ISSUE = (country, tz, ask) => ({
   pairs: [['pp.header', 'dv.时区'], ['dv.归属', 'dv.时区'], ['dv.时区', 'rule.tz']],
-  title: '信息不符  DISCREPANCY', sub: `国籍：${country}   VS   时区：${tz === 'Asia/Shanghai' ? '北京时间' : tz}`, ask,
+  title: '信息不符', sub: `国籍：${country}   VS   时区：${tz === 'Asia/Shanghai' ? '北京时间' : tz}`, ask,
 });
 const LANG_ISSUE = (country, lang, ask) => ({
   pairs: [['pp.header', 'dv.语言'], ['dv.归属', 'dv.语言'], ['dv.语言', 'rule.tz']],
-  title: '信息不符  DISCREPANCY', sub: `国籍：${country}   VS   语言：${lang}`, ask,
+  title: '信息不符', sub: `国籍：${country}   VS   语言：${lang}`, ask,
 });
 const VIRTUAL_ISSUE = (ask) => ({ pairs: [['ac.付款', 'rule.pay']], title: '可疑支付', sub: '付款卡类型：虚拟卡', ask });
 const SMS_ISSUE = (phone, ask) => ({
@@ -208,7 +236,7 @@ function randomDay1(valid) {
     const [city] = pick(co.cities);
     const loc = cc === 'SG' ? '新加坡' : `${co.name} · ${city}`;
     return {
-      person, voice: rint(100, 190),
+      person, voice: rint(100, 190), tongue: TONGUE[cc],
       intro: [['E', pick(co.hello)]],
       docs: [{ key: 'dv', doc: device1(randIP(false), loc) }], primary: 'dv',
       ok: ['approve'], issues: [],
@@ -217,7 +245,7 @@ function randomDay1(valid) {
   }
   const loc = pick(CN_LOCS.slice(0, 7));
   return {
-    person, voice: rint(100, 190),
+    person, voice: rint(100, 190), tongue: 'zh',
     intro: [['E', pick(['你好，我就问一个问题。', '听说这里能写代码？', '我是来充值的。', '同事说这个好用。'])]],
     docs: [{ key: 'dv', doc: device1(randIP(true), loc) }], primary: 'dv',
     ok: ['deny'], reason: `IP 归属：${loc.split(' · ').slice(0, 2).join(' · ')}`,
@@ -246,7 +274,7 @@ function day2Fixed() {
       react: { deny: [{ slip: true, hold: 0.8 }] },
     },
     brown: {
-      person: 'BROWN', voice: 120,
+      person: 'BROWN', voice: 120, rawSpeech: true,
       intro: [['E', 'Good morning，sir。']],
       tell: TELL('Good morning，sir。', '英文里夹着全角标点（输入法没切）',
         [['C', '你的逗号是全角的。'], ['E', '……这是美式逗号。', { expr: 'nervous', sweat: true }]]),
@@ -259,7 +287,7 @@ function day2Fixed() {
       issues: [],
     },
     emily: {
-      person: 'EMILY', voice: 190,
+      person: 'EMILY', voice: 190, rawSpeech: true,
       intro: [['E', 'Hi 哈。']],
       tell: TELL('Hi 哈。', '英文后面跟了个“哈”', [['C', '“哈”是什么？'], ['E', '……Ha! Ha ha.', { expr: 'nervous', sweat: true }]]),
       docs: [
@@ -367,7 +395,7 @@ function day4Fixed() {
       issues: [XRAY_ISSUE('cat', [['C', '口袋里是什么？'], ['E', '……是我的猫。', { expr: 'nervous', sweat: true }], ['C', '你的猫会自动换 IP？']])],
     },
     v50: {
-      person: 'V50', voice: 120,
+      person: 'V50', voice: 120, rawSpeech: true,
       intro: [['E', 'Hey! Crazy Thursday!']],
       tell: TELL('Hey! Crazy Thursday!', '他知道今天是“疯狂星期四”', [['C', '你怎么知道今天是疯狂星期四？'], ['E', '……KFC 是美国的。', { expr: 'grin' }]]),
       docs: usDocs('V50', 'MILLER', 'JAKE'), primary: 'pp',
@@ -390,7 +418,7 @@ function day4Fixed() {
       react: { deny: [['E', '……后天，后天我准备好。', { expr: 'sad' }]] },
     },
     hood: {
-      person: 'HOOD', voice: 90,
+      person: 'HOOD', voice: 90, tongue: 'en',
       intro: [['E', '……', { hold: 0.8 }]],
       docs: usDocs('HOOD', 'DOE', 'JOHN'), primary: 'pp',
       onPlace: { pp: 'note' },
@@ -431,7 +459,7 @@ function day5Fixed() {
       }],
     },
     mike: {
-      person: 'MIKE', voice: 135,
+      person: 'MIKE', voice: 135, tongue: 'en',
       intro: [['E', 'Hi there!']],
       docs: [
         { key: 'pp', doc: usPassport('MIKE', 'JOHNSON', 'MIKE', '1988.06.20', 'DENVER') },
@@ -444,7 +472,7 @@ function day5Fixed() {
       react: { deny: [['E', 'Unbelievable.', { expr: 'sad' }]] },
     },
     grandma: {
-      person: 'GRANDMA', voice: 185,
+      person: 'GRANDMA', voice: 185, tongue: 'en',
       intro: [['E', 'Good morning.']],
       docs: [
         { key: 'pp', doc: new Passport({ country: 'UNITED STATES OF AMERICA', name: 'WONG, MEI LIN', person: 'GRANDMA', mrz: 'P<USAWONG<<MEI<LIN<<<<<<<<<<',
@@ -508,7 +536,7 @@ function randomEntrant(day, kind) {
   let tz = tz0, lang = co.lang, ip = randIP(false);
   let pay = realPay(), bill = `${pick(STREETS)}, ${st}`, phone = realPhone(cc, code);
   const spec = {
-    person, voice: rint(100, 190), intro: [['E', pick(co.hello)]], primary: 'pp', issues: [], quiz: null,
+    person, voice: rint(100, 190), tongue: TONGUE[cc], intro: [['E', pick(co.hello)]], primary: 'pp', issues: [], quiz: null,
     ok: ['approve'], react: { approve: [['E', pick(co.thanks)]] },
   };
   const nervous = (lines) => ['E', pick(lines), { sweat: true, expr: 'nervous' }];
@@ -532,6 +560,7 @@ function randomEntrant(day, kind) {
   } else if (kind === 'hidden') {
     const [say, sub, ask] = pick(RANDOM_TELLS);
     spec.intro = [['E', say]];
+    spec.rawSpeech = true;
     spec.tell = TELL(say, sub, ask);
     spec.quiz = 'cn';
     spec.reason = 'Ta 会接测谎题';
@@ -553,6 +582,8 @@ function randomEntrant(day, kind) {
     spec.issues.push(XRAY_ISSUE(kind, [['C', '口袋里是什么？'], nervous(kind === 'cat' ? ['……是我的猫。', '……宠物而已。'] : ['我只用它打英文！', '……拼音好用。'])]));
     spec.reason = kind === 'cat' ? 'X 光：小猫咪' : 'X 光：中文输入法';
   }
+  if (kind === 'valid' || kind === 'cnip') spec.tongue = TONGUE[cc];
+  else spec.tongue = 'zh';
   if (kind !== 'valid') {
     spec.ok = ['deny', 'detain'];
     if (kind !== 'cnip') spec.quiz = 'cn';
