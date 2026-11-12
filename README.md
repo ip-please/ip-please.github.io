@@ -14,7 +14,8 @@
 </p>
 
 <p align="center">
-  <a href="https://ip-please.github.io"><b>▶ 在线玩：ip-please.github.io</b></a>
+  <a href="https://ip-please.github.io"><b>▶ 在线玩：ip-please.github.io</b></a><br>
+  续作 <a href="https://ipo-please.github.io/"><b>《IPO, PLEASE · 请出示资金证明》</b></a> 已上线（<a href="https://github.com/ipo-please/ipo-please.github.io">仓库</a>）· <a href="https://space.bilibili.com/3707008398134122">B 站主页</a>
 </p>
 
 <p align="center">

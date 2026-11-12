@@ -13,6 +13,8 @@ const EN = {
   'IP, PLEASE · 请出示你的 IP': 'IP, PLEASE · A Papers, Please parody',
   'IP, PLEASE 游戏画面': 'IP, PLEASE game screen',
   '全屏': 'Fullscreen',
+  '续作《IPO, PLEASE》已上线 ▶': 'Sequel out now: IPO, PLEASE ▶',
+  'B站主页': 'Bilibili',
   '声音：开': 'Sound: on',
   '声音：关': 'Sound: off',
   '把手机横过来玩': 'Turn your phone sideways',

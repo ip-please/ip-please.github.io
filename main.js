@@ -27,6 +27,7 @@ function onDown(ev) {
   if (canvasEl.setPointerCapture) canvasEl.setPointerCapture(ev.pointerId);
   ev.preventDefault();
   if (scene === 'booth') boothInput(x, y);
+  else if ((portalDown = portalAt(x, y))) return;   // 传送门：松手再打开
   else sceneClick(x, y);
 }
 
@@ -40,6 +41,7 @@ function onUp(ev) {
   const [x, y] = toGame(ev);
   Object.assign(ptr, { x, y, down: false });
   if (drag) dragEnd(x, y);
+  if (portalDown) { if (portalAt(x, y) === portalDown) openPortal(portalDown); portalDown = null; }
 }
 
 function boothInput(x, y) {
@@ -175,6 +177,7 @@ function render() {
   else if (scene === 'summary') drawSummary(t);
   else if (scene === 'end') drawEnd(t);
   else if (scene === 'over') drawOver(t);
+  drawPortals();                                 // 标题页、片尾右下角的传送门（其它画面不画）
 
   const g = canvasEl.getContext('2d');
   g.imageSmoothingEnabled = false;
@@ -185,7 +188,7 @@ function render() {
   }
   g.fillStyle = K.INK; g.fillRect(0, 0, W, H);
   g.drawImage(F, ox, oy);
-  let cursor = drag ? 'hand' : 'arrow';
+  let cursor = drag || portalAt(ptr.x, ptr.y) ? 'hand' : 'arrow';
   if (scene === 'booth' && !inChat()) {
     if (B.insp.on) composeInspect(g);
     drawEffects(g);
@@ -239,7 +242,13 @@ function boot() {
   canvasEl.addEventListener('contextmenu', (e) => e.preventDefault());
   window.addEventListener('keydown', (e) => { if (e.key === 'm' || e.key === 'M') toggleMute(); });
   newGame();
-  loadImages().then(() => { sceneT0 = performance.now() / 1000; requestAnimationFrame(loop); });
+  loadImages().then(() => {
+    sceneT0 = performance.now() / 1000;
+    // 预览：网址后面加 #end 直接看片尾，#title 直接看标题页（跳过选语言，用上次选的语言）
+    const jump = location.hash.slice(1);
+    if (jump === 'end' || jump === 'title') go(jump);
+    requestAnimationFrame(loop);
+  });
 }
 
 window.addEventListener('DOMContentLoaded', boot);

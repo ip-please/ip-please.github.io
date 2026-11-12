@@ -373,3 +373,82 @@ function restartButton(label) {
   rect(...RESTART_BTN, K.RED_D); outline(...RESTART_BTN, K.RED_L);
   txt(center(RESTART_BTN)[0], RESTART_BTN[1] + 6, T(label), 12, K.WHITE, 'ma');
 }
+
+// ———————————————————— 传送门：标题页和片尾的右下角 ————————————————————
+// 前作和续作互相指路，再加 GitHub 和 B 站主页。链接在松手（pointerup）时才打开：
+// 手机上 pointerdown 不算用户手势，在那里 window.open 会被浏览器当弹窗拦掉。
+const BILI_URL = 'https://space.bilibili.com/3707008398134122';
+const PORTALS = [
+  { label: '续作《IPO, PLEASE》已上线 ▶', url: 'https://ipo-please.github.io/', hot: ['rgb(22,64,44)', 'rgb(36,96,62)', 'rgb(52,132,84)'] },
+  { label: 'GitHub', icon: 'github', url: 'https://github.com/ip-please/ip-please.github.io' },
+  { label: 'B站主页', icon: 'bili', url: BILI_URL },
+];
+const PORTAL_SIZE = 10, PORTAL_LH = 15;
+// 像素 logo（12×11）：G = 圆，. = 透明，猫是挖空的；B = B 站粉
+const PORTAL_ICONS = {
+  github: { w: 12, col: { G: 'rgb(214,206,190)' }, hov: { G: 'rgb(255,255,255)' }, px: [
+    '....GGGG....',
+    '..GGGGGGGG..',
+    '.GG.GGGG.GG.',
+    '.GG......GG.',
+    'GG........GG',
+    'GG........GG',
+    'GG........GG',
+    'GGG......GGG',
+    '.G.GG..GGGG.',
+    '.GG...GGGGG.',
+    '..GGG.GGGG..',
+    '....G.GG....'] },
+  bili: { w: 13, col: { B: 'rgb(251,114,153)' }, hov: { B: 'rgb(255,160,190)' }, px: [
+    '..B.......B..',
+    '...B.....B...',
+    '.BBBBBBBBBBB.',
+    'B...........B',
+    'B.B.......B.B',
+    'B..B.....B..B',
+    'B...........B',
+    'B...........B',
+    'B...........B',
+    '.BBBBBBBBBBB.',
+    '..B.......B..'] },
+};
+let portalDown = null;
+
+function portalsShown() {
+  return (scene === 'title' && st() >= 1.6) || (scene === 'end' && st() > 2.4);
+}
+
+function portalBoxes() {
+  const n = PORTALS.length;
+  return PORTALS.map((p, i) => {
+    const ic = PORTAL_ICONS[p.icon];
+    const w = tw(T(p.label), PORTAL_SIZE) + (ic ? ic.w + 4 : 0), y = H - 8 - (n - i) * PORTAL_LH + 3;
+    return { p, box: [W - 14 - w, y - 3, W - 8, y + PORTAL_SIZE + 2] };
+  });
+}
+
+function portalAt(x, y) {
+  if (!portalsShown()) return null;
+  const hit = portalBoxes().find((b) => inBox(x, y, b.box));
+  return hit ? hit.p : null;
+}
+
+function openPortal(p) {
+  SFX.play('stamp_approve', 0.5, 0.02);
+  window.open(p.url, '_blank', 'noopener');
+}
+
+function drawPortals() {
+  if (!portalsShown()) return;
+  for (const { p, box } of portalBoxes()) {
+    const [x0, y0, x1, y1] = box;
+    const hover = ptr.mouse && inBox(ptr.x, ptr.y, box);
+    if (p.hot) {                                  // 前作 / 续作做成小按钮，用对方游戏的主色
+      rect(x0, y0, x1, y1, hover ? p.hot[1] : p.hot[0]); outline(x0, y0, x1, y1, p.hot[2]);
+    }
+    const label = T(p.label), lw = tw(label, PORTAL_SIZE), ic = PORTAL_ICONS[p.icon];
+    txt(x1 - 3, y0 + 3, label, PORTAL_SIZE, p.hot || hover ? K.WHITE : K.GREY, 'ra');
+    if (ic) pattern(ic.px, x1 - 3 - lw - 4 - ic.w, y0 + 2, hover ? ic.hov : ic.col);
+    if (hover && !p.hot) rect(x1 - 3 - lw, y1, x1 - 3, y1, K.WHITE);
+  }
+}

@@ -15,7 +15,8 @@
 
 <p align="center">
   <a href="https://ip-please.github.io"><b>▶ Play in your browser: ip-please.github.io</b></a><br>
-  <sub>Pick <b>English</b> on the first screen.</sub>
+  <sub>Pick <b>English</b> on the first screen.</sub><br>
+  The sequel <a href="https://ipo-please.github.io/"><b>IPO, PLEASE</b></a> is out (<a href="https://github.com/ipo-please/ipo-please.github.io">repo</a>) · <a href="https://space.bilibili.com/3707008398134122">Bilibili</a>
 </p>
 
 <p align="center">
