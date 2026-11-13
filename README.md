@@ -63,6 +63,7 @@ https://ip-please.github.io
 | [IP, PLEASE：零号档案 · File Zero](https://ip-please-zero.azurpilot.com/)<br>[源码](https://github.com/wess09/ip-please-zero) | 茗（[wess09](https://github.com/wess09)） | 14 天剧情，调查第 0000 号申请，在证据、规则和选择之间走向 30 个结局；九位 AI 旅客（GPT、Qwen、Grok、Kimi、Gemini、大肥鱼……），另有无尽模式 |
 | [IP, PLEASE Mobile · Android 移植版](https://github.com/zhcalvin/ip-please-mobile)<br>[APK 下载](https://github.com/zhcalvin/ip-please-mobile/releases) | [zhcalvin](https://github.com/zhcalvin) | 原版 6 天剧情原样移植到 Android 8.0+，离线可玩，手机和平板横屏触摸，中英双语，切到后台自动暂停 |
 | [IP, PLEASE · 第二周 · Week Two](https://kujoushiori.github.io/ip-please-week-two/)<br>[源码](https://github.com/KujouShiori/ip-please-week-two) | [KujouShiori](https://github.com/KujouShiori) | 原版 6 天原样保留，看完结局可以接着上第二周（第 7–9 天）：被拒的人换一身伪装再来，第 8 天起档案本身会造假，第 9 天审计组来查你自己的判例。5 个结局和跨周目结局图鉴，另有无尽排班模式 |
+| [IP, PLEASE · 模组商店版](https://ip-please.zhihaojiang.com/)<br>[源码](https://github.com/super-213/ip-please) | [super-213](https://github.com/super-213) | 原版 6 天不变，把游戏拆成底座加插件：翻译、加旅客、存档备份这类小 mod 可以同时开好几个，互相冲突时开局前就报出来。右上角有模组商店，能安装 `.ipmod` 包、添加别人发布的商店目录。附带加长版和零号档案的适配包（两者都替换整个战役，不能同时开） |
 
 ## 目录
 
